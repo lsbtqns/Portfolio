@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesbet Quines | Portfolio</title>
+    <!-- Importing a modern font -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --primary: #38bdf8;
+            --secondary: #818cf8;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* --- Background Animation Canvas --- */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.6;
+        }
+
+        /* --- Navigation --- */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1.5rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-main);
+            text-decoration: none;
+            font-weight: 500;
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background: var(--primary);
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* --- Hero Section --- */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 1rem;
+            position: relative;
+        }
+
+        .hero h1 {
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1rem;
+            opacity: 0;
+            animation: fadeUp 1s ease forwards 0.2s;
+        }
+
+        .hero p {
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+            color: var(--text-muted);
+            max-width: 600px;
+            margin-bottom: 2rem;
+            opacity: 0;
+            animation: fadeUp 1s ease forwards 0.4s;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.8rem 2rem;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            box-shadow: 0 10px 20px -10px rgba(56, 189, 248, 0.5);
+            transition: var(--transition);
+            opacity: 0;
+            animation: fadeUp 1s ease forwards 0.6s;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 25px -10px rgba(129, 140, 248, 0.6);
+        }
+
+        .scroll-down {
+            position: absolute;
+            bottom: 2rem;
+            animation: bounce 2s infinite;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* --- Section Styling --- */
+        section {
+            padding: 6rem 10%;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .section-title span {
+            color: var(--primary);
+        }
+
+        /* --- Projects Grid --- */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2.5rem;
+            perspective: 1000px; /* For 3D tilt */
+        }
+
+        .project-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 2rem;
+            position: relative;
+            transform-style: preserve-3d;
+            transform: translateZ(0);
+            transition: transform 0.1s ease-out; /* Fast transition for smooth tilt */
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+        }
+
+        .project-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.15);
+        }
+
+        .card-icon {
+            font-size: 2.5rem;
+            color: var(--secondary);
+            margin-bottom: 1.5rem;
+            transform: translateZ(20px); /* Parallax depth */
+        }
+
+        .project-title {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            transform: translateZ(30px);
+        }
+
+        .project-desc {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 2rem;
+            transform: translateZ(20px);
+        }
+
+        .card-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+            transform: translateZ(20px);
+        }
+
+        .tag {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: var(--primary);
+        }
+
+        .card-link {
+            text-decoration: none;
+            color: var(--text-main);
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transform: translateZ(30px);
+            transition: var(--transition);
+        }
+
+        .card-link:hover {
+            color: var(--primary);
+            gap: 1rem;
+        }
+
+        /* --- Contact/Footer --- */
+        .footer {
+            text-align: center;
+            padding: 3rem 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            color: var(--text-muted);
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .social-links a {
+            color: var(--text-main);
+            font-size: 1.5rem;
+            transition: var(--transition);
+        }
+
+        .social-links a:hover {
+            color: var(--primary);
+            transform: scale(1.1);
+        }
+
+        /* --- Animations --- */
+        @keyframes fadeUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease-out;
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none; /* Simple hide for mobile, ideally a hamburger menu */
+            }
+            section { padding: 4rem 5%; }
+            .hero h1 { font-size: 3rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Background Animation -->
+    <canvas id="bg-canvas"></canvas>
+
+    <header>
+        <nav>
+            <div class="logo">Lesbet Quines</div>
+            <ul class="nav-links">
+                <li><a href="#hero">Home</a></li>
+                <li><a href="#projects">Projects</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section id="hero" class="hero">
+            <h1>Hi, I'm <span style="color: var(--primary);">Lesbet Quines</span></h1>
+            <p>Building interactive web experiences with clean code and modern design.</p>
+            <a href="#projects" class="btn">View My Work</a>
+            <div class="scroll-down" onclick="document.getElementById('projects').scrollIntoView({behavior: 'smooth'})">
+                <i class="fas fa-chevron-down"></i>
+            </div>
+        </section>
+
+        <!-- Projects Section -->
+        <section id="projects">
+            <h2 class="section-title reveal">Selected <span>Projects</span></h2>
+            
+            <div class="projects-grid">
+
+                <!-- Project 1: HealthQuest -->
+                <article class="project-card reveal">
+                    <div class="card-content">
+                        <div class="card-icon"><i class="fas fa-heartbeat"></i></div>
+                        <h3 class="project-title">HealthQuest</h3>
+                        <p class="project-desc">A comprehensive wellness tracking application designed to help users achieve their fitness goals.</p>
+                        <div class="card-tags">
+                            <span class="tag">HTML/CSS</span>
+                            <span class="tag">JavaScript</span>
+                        </div>
+                    </div>
+                    <!-- TODO: Insert your HealthQuest Link below in the href attribute -->
+                    <a href="#" class="card-link" target="_blank" title="View Project">
+                        View Project <i class="fas fa-arrow-right"></i>
+                    </a>
+                </article>
+
+                <!-- Project 2: BorrowSmart -->
+                <article class="project-card reveal">
+                    <div class="card-content">
+                        <div class="card-icon"><i class="fas fa-hand-holding-dollar"></i></div>
+                        <h3 class="project-title">BorrowSmart</h3>
+                        <p class="project-desc">A financial literacy platform helping users manage loans and understand credit scores effectively.</p>
+                        <div class="card-tags">
+                            <span class="tag">Frontend</span>
+                            <span class="tag">UI/UX</span>
+                        </div>
+                    </div>
+                    <!-- TODO: Insert your BorrowSmart Link below in the href attribute -->
+                    <a href="#" class="card-link" target="_blank" title="View Project">
+                        View Project <i class="fas fa-arrow-right"></i>
+                    </a>
+                </article>
+
+                <!-- Project 3: Placeholder 1 -->
+                <article class="project-card reveal">
+                    <div class="card-content">
+                        <div class="card-icon"><i class="fas fa-laptop-code"></i></div>
+                        <h3 class="project-title">Project Alpha</h3>
+                        <p class="project-desc">Description of your third project goes here. Highlight key features and technologies used.</p>
+                        <div class="card-tags">
+                            <span class="tag">Web Dev</span>
+                            <span class="tag">API</span>
+                        </div>
+                    </div>
+                    <!-- TODO: Insert Project Link below -->
+                    <a href="#" class="card-link" target="_blank" title="View Project">
+                        View Project <i class="fas fa-arrow-right"></i>
+                    </a>
+                </article>
+
+                <!-- Project 4: Placeholder 2 -->
+                <article class="project-card reveal">
+                    <div class="card-content">
+                        <div class="card-icon"><i class="fas fa-camera-retro"></i></div>
+                        <h3 class="project-title">Project Beta</h3>
+                        <p class="project-desc">Description of your fourth project. Focus on the problem it solves for the user.</p>
+                        <div class="card-tags">
+                            <span class="tag">Design</span>
+                            <span class="tag">Animation</span>
+                        </div>
+                    </div>
+                    <!-- TODO: Insert Project Link below -->
+                    <a href="#" class="card-link" target="_blank" title="View Project">
+                        View Project <i class="fas fa-arrow-right"></i>
+                    </a>
+                </article>
+
+                <!-- Project 5: Placeholder 3 -->
+                <article class="project-card reveal">
+                    <div class="card-content">
+                        <div class="card-icon"><i class="fas fa-rocket"></i></div>
+                        <h3 class="project-title">Project Gamma</h3>
+                        <p class="project-desc">Description of your fifth project. Make sure to mention your role in the development.</p>
+                        <div class="card-tags">
+                            <span class="tag">Full Stack</span>
+                            <span class="tag">Database</span>
+                        </div>
+                    </div>
+                    <!-- TODO: Insert Project Link below -->
+                    <a href="#" class="card-link" target="_blank" title="View Project">
+                        View Project <i class="fas fa-arrow-right"></i>
+                    </a>
+                </article>
+
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="reveal" style="text-align: center;">
+            <h2 class="section-title">Let's <span>Connect</span></h2>
+            <p style="color: var(--text-muted); margin-bottom: 2rem; max-width: 500px; margin-left: auto; margin-right: auto;">
+                I'm currently available for freelance work or full-time opportunities.
+            </p>
+            <!-- TODO: Update email link -->
+            <a href="mailto:email@example.com" class="btn">Get In Touch</a>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2023 Lesbet Quines. All rights reserved.</p>
+        <div class="social-links">
+            <!-- TODO: Update Social Links -->
+            <a href="#"><i class="fab fa-github"></i></a>
+            <a href="#"><i class="fab fa-linkedin"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+        </div>
+    </footer>
+
+    <script>
+        // --- 1. Canvas Background Particle System ---
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let particlesArray;
+
+        // Resize canvas
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 1;
+                this.speedX = Math.random() * 1 - 0.5;
+                this.speedY = Math.random() * 1 - 0.5;
+                this.color = 'rgba(56, 189, 248, 0.3)'; // Primary color low opacity
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                // Bounce off edges
+                if (this.x > canvas.width || this.x < 0) this.speedX = -this.speedX;
+                if (this.y > canvas.height || this.y < 0) this.speedY = -this.speedY;
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particlesArray = [];
+            let numberOfParticles = (canvas.height * canvas.width) / 15000;
+            for (let i = 0; i < numberOfParticles; i++) {
+                particlesArray.push(new Particle());
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+                particlesArray[i].draw();
+                
+                // Draw connections
+                for (let j = i; j < particlesArray.length; j++) {
+                    const dx = particlesArray[i].x - particlesArray[j].x;
+                    const dy = particlesArray[i].y - particlesArray[j].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < 100) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = `rgba(129, 140, 248, ${1 - distance/100})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.moveTo(particlesArray[i].x, particlesArray[i].y);
+                        ctx.lineTo(particlesArray[j].x, particlesArray[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(animateParticles);
+        }
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            initParticles();
+        });
+
+        initParticles();
+        animateParticles();
+
+
+        // --- 2. Scroll Reveal Animation ---
+        const revealElements = document.querySelectorAll('.reveal');
+
+        const revealOnScroll = () => {
+            const windowHeight = window.innerHeight;
+            const elementVisible = 150;
+
+            revealElements.forEach((reveal) => {
+                const elementTop = reveal.getBoundingClientRect().top;
+                if (elementTop < windowHeight - elementVisible) {
+                    reveal.classList.add('active');
+                }
+            });
+        };
+
+        window.addEventListener('scroll', revealOnScroll);
+        // Trigger once on load
+        revealOnScroll();
+
+
+        // --- 3. 3D Tilt Effect for Cards ---
+        const cards = document.querySelectorAll('.project-card');
+
+        cards.forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                // Calculate rotation (max 15 degrees)
+                const xPct = x / rect.width;
+                const yPct = y / rect.height;
+                
+                const xRot = (0.5 - yPct) * 20; // Rotate X axis based on Y position
+                const yRot = (xPct - 0.5) * 20; // Rotate Y axis based on X position
+
+                card.style.transform = `perspective(1000px) rotateX(${xRot}deg) rotateY(${yRot}deg) scale(1.02)`;
+            });
+
+            // Reset on mouse leave
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale(1)';
+            });
+        });
+
+    </script>
+</body>
+</html>
